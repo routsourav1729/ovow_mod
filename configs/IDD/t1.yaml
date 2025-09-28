@@ -1,0 +1,22 @@
+_BASE_: "base.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"  # ✅ Use detectron2 weights
+  RESNETS:
+    DEPTH: 50
+    STRIDE_IN_1X1: False
+  NUM_PROPOSALS: 500
+  NUM_CLASSES: 12                    # ✅ 11 known + 1 unknown for IDD
+DATASETS:
+  TRAIN: ("my_train",)
+  TEST: ("my_val",)
+SOLVER:
+  STEPS: (40000, 60000)
+  MAX_ITER: 70000
+TEST:
+  EVAL_PERIOD: 7000
+  PREV_INTRODUCED_CLS: 0
+  CUR_INTRODUCED_CLS: 11             # ✅ 11 known classes for IDD t1
+INPUT:
+  CROP:
+    ENABLED: True
+  FORMAT: "RGB"
