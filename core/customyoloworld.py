@@ -226,10 +226,6 @@ class CustomYoloWorld(nn.Module):
         #mask.scatter_(2, self.tmp_labels.unsqueeze(2), 1)
         b, n, c = flatten_scores_list.shape
         #temporary changes
-        print(f"DEBUG: flatten_scores_list shape: {flatten_scores_list.shape}")
-        print(f"DEBUG: tmp_labels shape: {self.tmp_labels.shape}")
-        print(f"DEBUG: tmp_labels unique values: {torch.unique(self.tmp_labels)}")
-        print(f"DEBUG: unknown_index: {self.unknown_index}")
         
         flatten_scores_list = torch.div(flatten_scores_list,
                                         self.temperature)

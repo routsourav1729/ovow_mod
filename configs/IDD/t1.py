@@ -6,7 +6,7 @@ custom_imports = dict(imports=['yolo_world'],
 # hyper-parameters
 num_classes = 1203
 num_training_classes = 80
-max_epochs = 1  # Maximum training epochs
+max_epochs = 50  # Maximum training epochs
 close_mosaic_epochs = 2
 save_epoch_intervals = 2
 text_channels = 512

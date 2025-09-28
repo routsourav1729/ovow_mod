@@ -5,7 +5,7 @@ MODEL:
     DEPTH: 50
     STRIDE_IN_1X1: False
   NUM_PROPOSALS: 500
-  NUM_CLASSES: 12                    # ✅ 11 known + 1 unknown for IDD
+  NUM_CLASSES: 24                  
 DATASETS:
   TRAIN: ("my_train",)
   TEST: ("my_val",)

@@ -3,7 +3,6 @@ MODEL:
   WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
   PIXEL_MEAN: [123.675, 116.280, 103.530]
   PIXEL_STD: [58.395, 57.120, 57.375]
-  NUM_CLASSES: 12  # 11 known + 1 unknown
   BACKBONE:
     NAME: "build_resnet_fpn_backbone"
   RESNETS:
