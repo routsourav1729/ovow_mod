@@ -3,20 +3,20 @@ _base_ = ('../../third_party/mmyolo/configs/yolov8/'
 custom_imports = dict(imports=['yolo_world'],
                       allow_failed_imports=False)
 
-# hyper-parameters
-num_classes = 1203
-num_training_classes = 80
-max_epochs = 50  # Maximum training epochs
-close_mosaic_epochs = 2
-save_epoch_intervals = 2
+# hyper-parameters (IDD t1: 11 known classes)
+num_classes = 11
+num_training_classes = 11
+max_epochs = 60  # was 120; reduce to speed up
+close_mosaic_epochs = 10
+save_epoch_intervals = 5
 text_channels = 512
 neck_embed_channels = [128, 256, _base_.last_stage_out_channels // 2]
 neck_num_heads = [4, 8, _base_.last_stage_out_channels // 2 // 32]
-base_lr = 1e-4
+base_lr = 2e-4
 weight_decay = 0.0125
-train_batch_size_per_gpu = 16
+train_batch_size_per_gpu = 16  # was 32; lighter for faster iters
 affine_scale = 0.5
-max_aspect_ratio = 100
+max_aspect_ratio = 120
 text_model_name = '../pretrained_models/clip-vit-base-patch32-projection'
 text_model_name = 'openai/clip-vit-base-patch32'
 ood_threshold = 4.0  # Adjusted for IDD

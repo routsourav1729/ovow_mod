@@ -376,7 +376,10 @@ def parse_rec(filename, known_classes):
         obj_struct["name"] = cls_name
         # obj_struct["pose"] = obj.find("pose").text
         # obj_struct["truncated"] = int(obj.find("truncated").text)
-        obj_struct["difficult"] = int(obj.find("difficult").text)
+        #temporary chnge by sourav
+        # obj_struct["difficult"] = int(obj.find("difficult").text) 
+        difficult_elem = obj.find("difficult")
+        obj_struct["difficult"] = int(difficult_elem.text) if difficult_elem is not None else 0
         bbox = obj.find("bndbox")
         obj_struct["bbox"] = [
             int(bbox.find("xmin").text),

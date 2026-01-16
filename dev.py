@@ -64,20 +64,55 @@ def setup(args):
 
 
 
-# Function to save the model
-def save_model(model, epoch, save_dir='checkpoints', file_name="model"):
+# Function to save the model with optimizer state
+def save_model(model, optimizer, epoch, save_dir='checkpoints', file_name="model"):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     file_path = os.path.join(save_dir, f"{file_name}_{epoch}.pth")
-    torch.save(model.state_dict(), file_path)
+    checkpoint = {
+        'epoch': epoch,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+    }
+    torch.save(checkpoint, file_path)
     print(f"Model saved to {file_path}")
+
+
+def load_checkpoint(model, optimizer, checkpoint_path):
+    """Load checkpoint and return the epoch to resume from"""
+    import re
+    print(f"Loading checkpoint from {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location='cuda')
+    
+    # Handle both old format (state_dict only) and new format (full checkpoint)
+    if 'model_state_dict' in checkpoint:
+        # New format with optimizer state
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        start_epoch = checkpoint['epoch'] + 1
+        print(f"✓ Resuming from epoch {start_epoch} (checkpoint has optimizer state)")
+    else:
+        # Old format - just model weights
+        model.load_state_dict(checkpoint)
+        # Try to extract epoch from filename
+        match = re.search(r'model_(\d+)\.pth', checkpoint_path)
+        if match:
+            start_epoch = int(match.group(1)) + 1
+            print(f"✓ Loaded model weights from epoch {int(match.group(1))}, resuming from epoch {start_epoch}")
+            print(f"⚠ Warning: Optimizer state not found in checkpoint - optimizer will restart")
+        else:
+            start_epoch = 0
+            print(f"⚠ Loaded model weights only (old format), couldn't determine epoch from filename")
+    
+    return start_epoch
 
 
 if __name__ == "__main__":
     parser0 = default_argument_parser()
     parser0.add_argument("--task", default="")
     parser0.add_argument("--ckpt", default="model.pth")
+    parser0.add_argument("--resume_from", default="", help="Path to checkpoint to resume from")
     args = parser0.parse_args()
     print("Command Line Args:", args)
     cfg = setup(args)
@@ -122,9 +157,20 @@ if __name__ == "__main__":
 
     trainable = ['embeddings']
     model = CustomYoloWorld(runner.model,unknown_index)
-    with torch.no_grad():
-        model = load_ckpt(model, args.ckpt,cfg.TEST.PREV_INTRODUCED_CLS,cfg.TEST.CUR_INTRODUCED_CLS)
-    model = model.cuda()
+    
+    # Determine which checkpoint to load from
+    if args.resume_from:
+        # Resuming training - skip initial checkpoint load
+        print(f"=== RESUMING TRAINING ===")
+        model = model.cuda()
+    else:
+        # Fresh training - load pretrained checkpoint
+        print(f"=== STARTING FRESH TRAINING ===")
+        with torch.no_grad():
+            model = load_ckpt(model, args.ckpt,cfg.TEST.PREV_INTRODUCED_CLS,cfg.TEST.CUR_INTRODUCED_CLS)
+        model = model.cuda()
+    
+    # Set trainable parameters
     for name, param in model.named_parameters():
         #if name in trainable or 'projectors' in name:
         if name in trainable:
@@ -132,10 +178,17 @@ if __name__ == "__main__":
         else:
             param.requires_grad_(False)
     model.enable_projector_grad(cfg.TEST.PREV_INTRODUCED_CLS)
+    
+    # Initialize optimizer
     optimizer = optim.AdamW(model.parameters(), lr=cfgY.base_lr, weight_decay=cfgY.weight_decay)
 
+    # Load checkpoint if resuming (must be AFTER optimizer initialization)
+    start_epoch = 0
+    if args.resume_from:
+        start_epoch = load_checkpoint(model, optimizer, args.resume_from)
+
     model.train()
-    for epoch in range(cfgY.max_epochs):
+    for epoch in range(start_epoch, cfgY.max_epochs):
         print(f"Epoch: {epoch}")
         step = 0
         for i in train_loader:
@@ -150,9 +203,8 @@ if __name__ == "__main__":
             step+=1
         
         if epoch%5 == 0:
-            save_model(model, epoch, save_dir=args.task)
+            save_model(model, optimizer, epoch, save_dir=args.task)
         #each epoch save the latest model
-        save_model(model, 'latest', save_dir=args.task)
+        save_model(model, optimizer, 'latest', save_dir=args.task)
     #save the final model
-    save_model(model, 'final', save_dir=args.task)
-
+    save_model(model, optimizer, 'final', save_dir=args.task)

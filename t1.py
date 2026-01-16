@@ -65,7 +65,7 @@ backbone = dict(
     type='YOLOv8CSPDarknet',
     widen_factor=1.5)
 backend_args = None
-base_lr = 0.0001
+base_lr = 0.0002
 batch_shapes_cfg = None
 classes = (
     'person',
@@ -80,7 +80,7 @@ classes = (
     'bicycle',
     'ego vehicle',
 )
-close_mosaic_epochs = 2
+close_mosaic_epochs = 10
 custom_hooks = [
     dict(
         ema_type='ExpMomentumEMA',
@@ -90,7 +90,7 @@ custom_hooks = [
         type='EMAHook',
         update_buffers=True),
     dict(
-        switch_epoch=48,
+        switch_epoch=110,
         switch_pipeline=[
             dict(backend_args=None, type='LoadImageFromFile'),
             dict(scale=(
@@ -128,7 +128,7 @@ dataset_type = 'YOLOv5CocoDataset'
 deepen_factor = 1.0
 default_hooks = dict(
     checkpoint=dict(
-        interval=2,
+        interval=5,
         max_keep_ckpts=2,
         rule='greater',
         save_best='auto',
@@ -136,7 +136,7 @@ default_hooks = dict(
     logger=dict(interval=50, type='LoggerHook'),
     param_scheduler=dict(
         lr_factor=0.01,
-        max_epochs=50,
+        max_epochs=120,
         scheduler_type='linear',
         type='YOLOv5ParamSchedulerHook'),
     sampler_seed=dict(type='DistSamplerSeedHook'),
@@ -203,8 +203,8 @@ loss_bbox_weight = 7.5
 loss_cls_weight = 0.5
 loss_dfl_weight = 0.375
 lr_factor = 0.01
-max_aspect_ratio = 100
-max_epochs = 50
+max_aspect_ratio = 120
+max_epochs = 120
 max_keep_ckpts = 2
 mixup_prob = 0.15
 model = dict(
@@ -388,7 +388,7 @@ optim_wrapper = dict(
     clip_grad=dict(max_norm=10.0),
     constructor='YOLOWv5OptimizerConstructor',
     optimizer=dict(
-        batch_size_per_gpu=16, lr=0.0001, type='AdamW', weight_decay=0.0125),
+        batch_size_per_gpu=32, lr=0.0002, type='AdamW', weight_decay=0.0125),
     paramwise_cfg=dict(
         bias_decay_mult=0.0,
         custom_keys=dict({
@@ -404,7 +404,7 @@ pre_transform = [
     dict(type='LoadAnnotations', with_bbox=True),
 ]
 resume = False
-save_epoch_intervals = 2
+save_epoch_intervals = 5
 strides = [
     8,
     16,
@@ -514,15 +514,15 @@ text_transform = [
         type='mmdet.PackDetInputs'),
 ]
 train_ann_file = 'annotations/instances_train2017.json'
-train_batch_size_per_gpu = 16
+train_batch_size_per_gpu = 32
 train_cfg = dict(
     dynamic_intervals=[
         (
-            48,
+            110,
             1,
         ),
     ],
-    max_epochs=50,
+    max_epochs=120,
     type='EpochBasedTrainLoop',
     val_interval=10)
 train_data_prefix = 'train2017/'
@@ -722,7 +722,7 @@ train_pipeline_stage2 = [
         type='mmdet.PackDetInputs'),
 ]
 trlder = dict(
-    batch_size=16,
+    batch_size=32,
     dataset=dict(
         ann_file='ImageSets/Main/IDD/t1.txt',
         batch_shapes_cfg=None,

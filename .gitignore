@@ -129,13 +129,48 @@ dmypy.json
 .pyre/
 
 .idea/
+.vscode/
+
+# Output directories
+output/
 output*/
-/nu-OWODB/
-yolo_world_v2_xl_obj365v1_goldg_cc3mlite_pretrain-5daf1395.pth
+nu-OWODB/
+slurm_logs/
+20*/
+
+# Model checkpoints and weights
+*.pth
+*.pt
+*.ckpt
+*.weights
+*.pkl
+*.bin
+yolo_world*.pth
+
+# Large external repos/libraries
 YOLO-World/
 detectron2/
+mmcv/
+third_party/
+
+# Data directories
 data/
 datasets/nu-owodb/
 datasets/Annotations/
 datasets/IDD/
 datasets/JPEGImages/
+datasets/VOC*/
+datasets/coco/
+
+# IDD specific
+IDD/
+
+# Logs and temporary files
+*.log
+wandb/
+runs/
+logs/
+
+# System files
+.DS_Store
+Thumbs.db

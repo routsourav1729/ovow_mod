@@ -240,7 +240,9 @@ class CustomYoloWorld(nn.Module):
             negative = torch.exp(negative)
             log_prob = positive - torch.log(positive_exp.sum() + negative.sum())
             contrastive_losses.append(-log_prob.sum()/mask.sum())
-
+        #custom changes
+        if len(contrastive_losses) == 0:
+            return torch.tensor(0.0, device=flatten_scores_list.device, requires_grad=True)
         return sum(contrastive_losses) / len(contrastive_losses)
 
 
